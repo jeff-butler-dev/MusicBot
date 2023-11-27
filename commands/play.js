@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('@discordjs/builders');
-const { QueryType } = require('discord-player');
+const { QueryType, useQueue } = require('discord-player');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -39,7 +39,11 @@ module.exports = {
                     )
             ),
     execute: async ({client, interaction}) => {
-        const queue = client.player.nodes.create(interaction.guild)
+		if (!interaction.member.voice.channel) return interaction.reply("Join a channel first");
+
+        const queue = await client.player.nodes.create(interaction.guild)
+        
+		if (!queue.connection) await queue.connect(interaction.member.voice.channel)
 
         if (interaction.options.getSubcommand() === 'song') {
             let url = interaction.options.getString('url')
@@ -55,7 +59,7 @@ module.exports = {
             }
 
             trackToAdd = result.tracks[0]
-            queue.addTrack(trackToAdd);
+            await queue.addTrack(trackToAdd);
             
             embed = new EmbedBuilder()
                 .setTitle(trackToAdd.title)
@@ -99,7 +103,6 @@ module.exports = {
 
         else if (interaction.options.getSubcommand() === 'search') {
             let url = interaction.options.getString('searchterms')
-
             const result = await client.player.search(url, {
                 requestedBy: interaction.user,
                 searchEngine: QueryType.AUTO
@@ -110,8 +113,12 @@ module.exports = {
                 return
             }
 
+            console.log(queue.tracks.toArray());
+
             trackToAdd = result.tracks[0]
             queue.addTrack(trackToAdd);
+
+            console.log(queue.tracks.toArray());
 
             embed = new EmbedBuilder()
                 .setTitle(trackToAdd.title)
@@ -119,10 +126,10 @@ module.exports = {
                 .setImage(trackToAdd.thumbnail)
             
             await interaction.deferReply()
+
         }
         client.player.extractors.loadDefault();
-        queue.node.play()
-
+        if (!queue.isPlaying()) await queue.play(queue.tracks.data);
         await interaction.editReply({
             embeds: [embed]
         })

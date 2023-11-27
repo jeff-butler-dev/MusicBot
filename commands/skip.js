@@ -8,13 +8,11 @@ module.exports = {
         execute: async ({client, interaction}) => {
 
             const queue = useQueue(interaction.guildId);
-
             if(queue.node.size == 0) {
                 await interaction.reply('nothing in the queue to skip');
                 return
             }
-            
-            queue.node.skip()
+            queue.node.skip();
 
             await interaction.reply({
                 embeds: [

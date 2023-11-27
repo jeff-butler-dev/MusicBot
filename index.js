@@ -3,7 +3,7 @@ require('dotenv').config();
 const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v9');
 const { Client, Collection, GatewayIntentBits, Events} = require('discord.js');
-const { Player } = require('discord-player');
+const { Player, useQueue} = require('discord-player');
 
 const fs = require('fs');
 const path = require('path')
@@ -36,11 +36,12 @@ client.player = new Player(client, {
     }
 });
 
+
 client.player.extractors.loadDefault();
 
 client.on(Events.ClientReady, () => {
-    const guild_ids = client.guilds.cache.map(guild => guild.id);
 
+    const guild_ids = client.guilds.cache.map(guild => guild.id);
     const rest = new REST({version: '9'}).setToken(process.env.TOKEN);
 
     for(const guildID of guild_ids){
@@ -52,22 +53,18 @@ client.on(Events.ClientReady, () => {
     }
 })
 
-client.on(Events.InteractionCreate, async interaction => {
-
+client.on(Events.InteractionCreate, async (interaction) => {
+    
     if(!client.player){client.player = new Player(client, {
         ytdlOptions: {
             quality: "highestaudio",
             highWaterMark: 1 << 25
         }
     })};
-
     if (!interaction.isCommand()) return;
-    const queue = client.player.nodes.create(interaction.guild)
-    if (!queue.connection && interaction.commandName != 'exit') await queue.connect(interaction.member.voice.channel.id)
 
     const command = client.commands.get(interaction.commandName);
     if(!command) return;
-
     try {
         await command.execute({client, interaction});
     } catch (error) {
