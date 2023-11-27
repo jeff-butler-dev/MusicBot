@@ -13,18 +13,21 @@ module.exports = {
                 return
             }
 
-            // const queueString = queue.tracks.map((song, i) => {
-            //     return `${i + 1}) ${song.duration}\ ${song.title}`
-            // }).join('/n');
-
-            const queueString = queue.tracks.toArray()
+            //need to refactor to make end result look better.
+            testArray = []
+            const queueString = queue.tracks.map((song, i) => {
+                testArray.push({name:song.duration, value:song.title})
+                return `${i + 1}) ${song.duration}\ ${song.title}`
+            }).join('/n');
+            console.log('----------------', queueString);
             const currentSong = queue.currentTrack;
 
             await interaction.reply({
                 embeds: [
                     new EmbedBuilder()
-                    .setTitle(queueString)
-                    .setDescription(`Currently playing ${currentSong.title}`)
+                    .setTitle(`Current Song: ${currentSong.title}`)
+                    .setDescription('List of current songs')
+                    .setFields(testArray)
                 ]
             })
         }
