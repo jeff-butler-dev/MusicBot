@@ -39,10 +39,11 @@ module.exports = {
                     )
             ),
     execute: async ({client, interaction}) => {
-		if (!interaction.member.voice.channel) return interaction.reply("Join a channel first");
+        await interaction.deferReply()
+        client.player.extractors.loadDefault();
 
+		if (!interaction.member.voice.channel) return interaction.reply("Join a channel first");
         const queue = await client.player.nodes.create(interaction.guild)
-        
 		if (!queue.connection) await queue.connect(interaction.member.voice.channel)
 
         if (interaction.options.getSubcommand() === 'song') {
@@ -65,8 +66,6 @@ module.exports = {
                 .setTitle(trackToAdd.title)
                 .setDescription(`Track length [${trackToAdd.duration}]`)
                 .setImage(trackToAdd.thumbnail)
-
-            await interaction.deferReply()
         }
 
         else if (interaction.options.getSubcommand() === 'playlist') {
@@ -97,8 +96,6 @@ module.exports = {
                 .setTitle('Playlist added')
                 .setDescription(`List of songs in playlist`)
                 .addFields(arrayOfSongs)
-
-            await interaction.deferReply()
         }
 
         else if (interaction.options.getSubcommand() === 'search') {
@@ -124,11 +121,7 @@ module.exports = {
                 .setTitle(trackToAdd.title)
                 .setDescription(`Track length [${trackToAdd.duration}]`)
                 .setImage(trackToAdd.thumbnail)
-            
-            await interaction.deferReply()
-
         }
-        client.player.extractors.loadDefault();
         if (!queue.isPlaying()) await queue.play(queue.tracks.data);
         await interaction.editReply({
             embeds: [embed]
