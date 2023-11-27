@@ -1,5 +1,5 @@
-const { SlashCommandBuilder } = require('@discordjs/builders');
-const { MessageEmbed } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder} = require('@discordjs/builders');
+const { useQueue } = require('discord-player');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -7,15 +7,22 @@ module.exports = {
             .setDescription('pauses current song'),
         execute: async ({client, interaction}) => {
 
-            const queue = client.player.getQueue(interaction.guild);
+            const queue = useQueue(interaction.guildId);
 
-            if(!queue) {
+            if(queue.node.size == 0) {
                 await interaction.reply('nothing in the queue to pause');
                 return
             }
             
-            queue.setPaused(true);
+            if(!queue.node.isPaused() && !queue.node.size > 0)queue.node.setPaused(true)
+            else if(queue.node.isPaused() && !queue.node.size > 0)queue.node.setPaused(false)
 
-            await interaction.reply('Paused player')
+            await interaction.reply({
+                embeds: [
+                    new EmbedBuilder()
+                    .setTitle(`Paused current track`)
+                    .setDescription('Pause was successful')
+                ]
+            })
         }
 }
