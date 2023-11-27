@@ -13,7 +13,6 @@ module.exports = {
                 await interaction.reply('Not in a channel to exit');
                 return
             }
-            
             queue.connection.disconnect()
 
             await interaction.reply('Successfully removed')

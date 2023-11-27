@@ -110,12 +110,8 @@ module.exports = {
                 return
             }
 
-            console.log(queue.tracks.toArray());
-
             trackToAdd = result.tracks[0]
             queue.addTrack(trackToAdd);
-
-            console.log(queue.tracks.toArray());
 
             embed = new EmbedBuilder()
                 .setTitle(trackToAdd.title)
@@ -123,6 +119,7 @@ module.exports = {
                 .setImage(trackToAdd.thumbnail)
         }
         if (!queue.isPlaying()) await queue.play(queue.tracks.data);
+        console.log(queue.tracks.data);
         await interaction.editReply({
             embeds: [embed]
         })
