@@ -53,9 +53,17 @@ client.on(Events.ClientReady, () => {
 })
 
 client.on(Events.InteractionCreate, async interaction => {
+
+    if(!client.player){client.player = new Player(client, {
+        ytdlOptions: {
+            quality: "highestaudio",
+            highWaterMark: 1 << 25
+        }
+    })};
+
     if (!interaction.isCommand()) return;
     const queue = client.player.nodes.create(interaction.guild)
-    if (!queue.connection) await queue.connect(interaction.member.voice.channel.id)
+    if (!queue.connection && interaction.commandName != 'exit') await queue.connect(interaction.member.voice.channel.id)
 
     const command = client.commands.get(interaction.commandName);
     if(!command) return;

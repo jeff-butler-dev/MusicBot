@@ -120,7 +120,7 @@ module.exports = {
             
             await interaction.deferReply()
         }
-        
+        client.player.extractors.loadDefault();
         queue.node.play()
 
         await interaction.editReply({

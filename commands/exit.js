@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const { MessageEmbed } = require('discord.js');
+const { useQueue } = require('discord-player');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -7,15 +7,15 @@ module.exports = {
             .setDescription('removes bot from channel'),
         execute: async ({client, interaction}) => {
 
-            const queue = client.player.getQueue(interaction.guild);
+            const queue = useQueue(interaction.guildId);
 
-            if(!queue) {
-                await interaction.reply('nothing in the queue to pause');
+            if(!queue.connection) {
+                await interaction.reply('Not in a channel to exit');
                 return
             }
             
-            queue.destroy();
+            queue.connection.disconnect()
 
-            await interaction.reply('Paused removed')
+            await interaction.reply('Successfully removed')
         }
 }
