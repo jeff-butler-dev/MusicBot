@@ -56,11 +56,13 @@ module.exports = {
 
             trackToAdd = result.tracks[0]
             queue.addTrack(trackToAdd);
-            console.log('---------------------------------------', queue);
+            
             embed = new EmbedBuilder()
                 .setTitle(trackToAdd.title)
                 .setDescription(`Track length [${trackToAdd.duration}]`)
                 .setImage(trackToAdd.thumbnail)
+
+            await interaction.deferReply()
         }
 
         else if (interaction.options.getSubcommand() === 'playlist') {
@@ -79,7 +81,6 @@ module.exports = {
             playListToAdd = result.playlist
             queue.addTrack(playListToAdd)
 
-            // arrayOfSongs = [...playListToAdd.tracks.track.title]
             arrayOfSongs = []
             i=1
             for(song in playListToAdd.tracks){
@@ -92,9 +93,11 @@ module.exports = {
                 .setTitle('Playlist added')
                 .setDescription(`List of songs in playlist`)
                 .addFields(arrayOfSongs)
+
+            await interaction.deferReply()
         }
 
-        else if (interaction.options.getSubcommand() === 'searchterms') {
+        else if (interaction.options.getSubcommand() === 'search') {
             let url = interaction.options.getString('searchterms')
 
             const result = await client.player.search(url, {
@@ -114,11 +117,13 @@ module.exports = {
                 .setTitle(trackToAdd.title)
                 .setDescription(`Track length [${trackToAdd.duration}]`)
                 .setImage(trackToAdd.thumbnail)
+            
+            await interaction.deferReply()
         }
         
         queue.node.play()
 
-        await interaction.channel.send({
+        await interaction.editReply({
             embeds: [embed]
         })
     }
