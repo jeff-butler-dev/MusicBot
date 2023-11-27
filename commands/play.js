@@ -1,55 +1,45 @@
-const { slashCommandBuilder } = require('@discordjs/builders');
-const { MessageEmbed } = require('discord.js');
-const { queryType, QueryType } = require('discord-player');
+const { SlashCommandBuilder, EmbedBuilder } = require('@discordjs/builders');
+const { QueryType } = require('discord-player');
 
 module.exports = {
-    data: new slashCommandBuilder()
+    data: new SlashCommandBuilder()
             .setName('play')
             .setDescription('Plays a song')
-            .addSubCommand(subcommand => {
+            .addSubcommand(subcommand => 
                 subcommand
                     .setName('search')
                     .setDescription('Searches for a song')
-                    .addStringOption(option => {
+                    .addStringOption(option => 
                         option
                             .setName('searchterms')
                             .setDescription('search keywords')
-                            .setRequired(true);
-                    })
-            })
-            .addSubCommand(subcommand => {
+                            .setRequired(true)
+                    )
+            )
+            .addSubcommand(subcommand => 
                 subcommand
                     .setName('playlist')
                     .setDescription('Plays playlist from YT')
-                    .addStringOption(option => {
+                    .addStringOption(option => 
                         option
                             .setName('url')
                             .setDescription('playlist url')
-                            .setRequired(true);
-                    })
-            })
-            .addSubCommand(subcommand => {
+                            .setRequired(true)
+                    )
+            )
+            .addSubcommand(subcommand => 
                 subcommand
                     .setName('song')
                     .setDescription('Plays song from YT')
-                    .addStringOption(option => {
+                    .addStringOption(option => 
                         option
                             .setName('url')
                             .setDescription('song url')
-                            .setRequired(true);
-                    })
-            }),
+                            .setRequired(true)
+                    )
+            ),
     execute: async ({client, interaction}) => {
-        if (!interaction.member.voice.channel) {
-            await interaction.reply('Join a channel before requesting')
-            return;
-        }
-
-        const queue = await client.player.createQueue(interaction.guild);
-
-        if(!queue.connection) await queue.connect(interaction.member.voice.channel);
-
-        let embed = new MessageEmbed();
+        const queue = client.player.nodes.create(interaction.guild)
 
         if (interaction.options.getSubcommand() === 'song') {
             let url = interaction.options.getString('url')
@@ -64,12 +54,13 @@ module.exports = {
                 return
             }
 
-            const song = result[0];
-            await queue.addTrack(song);
-
-            embed
-            .setDescription(`Added ${song.title}`)
-            .setThumbnail(song.thumbnail)
+            trackToAdd = result.tracks[0]
+            queue.addTrack(trackToAdd);
+            console.log('---------------------------------------', queue);
+            embed = new EmbedBuilder()
+                .setTitle(trackToAdd.title)
+                .setDescription(`Track length [${trackToAdd.duration}]`)
+                .setImage(trackToAdd.thumbnail)
         }
 
         else if (interaction.options.getSubcommand() === 'playlist') {
@@ -85,15 +76,26 @@ module.exports = {
                 return
             }
 
-            const playlist = result[0];
-            await queue.addTracks(song);
+            playListToAdd = result.playlist
+            queue.addTrack(playListToAdd)
 
-            embed
-            .setDescription(`Added ${playlist.title}`)
-            .setThumbnail(playlist.thumbnail)
+            // arrayOfSongs = [...playListToAdd.tracks.track.title]
+            arrayOfSongs = []
+            i=1
+            for(song in playListToAdd.tracks){
+                title = playListToAdd.tracks[song].description
+                arrayOfSongs.push({name:String(i), value:title})
+                i+=1
+            }  
+
+            embed = new EmbedBuilder()
+                .setTitle('Playlist added')
+                .setDescription(`List of songs in playlist`)
+                .addFields(arrayOfSongs)
         }
+
         else if (interaction.options.getSubcommand() === 'searchterms') {
-            let url = interaction.options.getString('url')
+            let url = interaction.options.getString('searchterms')
 
             const result = await client.player.search(url, {
                 requestedBy: interaction.user,
@@ -105,17 +107,18 @@ module.exports = {
                 return
             }
 
-            const song = result[0];
-            await queue.addTrack(song);
+            trackToAdd = result.tracks[0]
+            queue.addTrack(trackToAdd);
 
-            embed
-            .setDescription(`Added ${song.title}`)
-            .setThumbnail(song.thumbnail)
+            embed = new EmbedBuilder()
+                .setTitle(trackToAdd.title)
+                .setDescription(`Track length [${trackToAdd.duration}]`)
+                .setImage(trackToAdd.thumbnail)
         }
         
-        if(!queue.playing) await queue.play();
+        queue.node.play()
 
-        await interaction.reply({
+        await interaction.channel.send({
             embeds: [embed]
         })
     }
