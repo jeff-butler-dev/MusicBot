@@ -61,7 +61,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
             highWaterMark: 1 << 25
         }
     })};
-    if (!interaction.isCommand()) return;
+    // if (!interaction.isCommand()) return;   
 
     const command = client.commands.get(interaction.commandName);
     if(!command) return;
