@@ -1,5 +1,4 @@
 require('dotenv').config();
-
 const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v9');
 const { Client, Collection, GatewayIntentBits, Events} = require('discord.js');
@@ -42,7 +41,7 @@ client.player.extractors.loadDefault();
 client.on(Events.ClientReady, () => {
 
     const guild_ids = client.guilds.cache.map(guild => guild.id);
-    const rest = new REST({version: '9'}).setToken(process.env.TOKEN);
+    const rest = new REST({version: '9'}).setToken(String(process.env.TOKEN));
 
     for(const guildID of guild_ids){
         rest.put(Routes.applicationGuildCommands(process.env.CLIENT_ID, guildID), {
