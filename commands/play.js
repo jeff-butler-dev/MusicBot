@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder } = require("@discordjs/builders");
-const { QueryType, useQueue } = require("discord-player");
+const { QueryType } = require("discord-player");
 
 module.exports = {
   data: new SlashCommandBuilder()

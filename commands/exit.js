@@ -6,6 +6,7 @@ module.exports = {
     .setName("exit")
     .setDescription("removes bot from channel"),
   execute: async ({ client, interaction }) => {
+    await interaction.deferReply();
     const queue = useQueue(interaction.guildId);
 
     if (!queue.connection) {

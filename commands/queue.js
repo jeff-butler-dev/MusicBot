@@ -6,6 +6,7 @@ module.exports = {
     .setName("queue")
     .setDescription("returns first 25 songs in queue"),
   execute: async ({ client, interaction }) => {
+    await interaction.deferReply();
     const queue = useQueue(interaction.guild.id);
 
     if (!queue || !queue.isPlaying()) {

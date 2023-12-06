@@ -2,7 +2,7 @@ require("dotenv").config();
 const { REST } = require("@discordjs/rest");
 const { Routes } = require("discord-api-types/v9");
 const { Client, Collection, GatewayIntentBits, Events } = require("discord.js");
-const { Player, useQueue } = require("discord-player");
+const { Player } = require("discord-player");
 
 const fs = require("fs");
 const path = require("path");
@@ -15,32 +15,36 @@ const client = new Client({
   ],
 });
 
-const commands = [];
-client.commands = new Collection();
-
-const commandsPath = path.join(__dirname, "commands");
-const commandFiles = fs
-  .readdirSync(commandsPath)
-  .filter((file) => file.endsWith(".js"));
-
-for (const file of commandFiles) {
-  const filePath = path.join(commandsPath, file);
-  const command = require(filePath);
-
-  client.commands.set(command.data.name, command);
-  commands.push(command.data.toJSON());
-}
-
-client.player = new Player(client, {
-  ytdlOptions: {
-    quality: "highestaudio",
-    highWaterMark: 1 << 25,
-  },
-});
-
-client.player.extractors.loadDefault();
+client.login(process.env.TOKEN);
 
 client.on(Events.ClientReady, () => {
+  // creating main player instance
+  client.player = new Player(client, {
+    ytdlOptions: {
+      quality: "highestaudio",
+      highWaterMark: 1 << 25,
+    },
+  });
+
+  client.player.extractors.loadDefault();
+
+  // creating list of commands to distribute to servers
+  const commands = [];
+  client.commands = new Collection();
+
+  const commandsPath = path.join(__dirname, "commands");
+  const commandFiles = fs
+    .readdirSync(commandsPath)
+    .filter((file) => file.endsWith(".js"));
+
+  for (const file of commandFiles) {
+    const filePath = path.join(commandsPath, file);
+    const command = require(filePath);
+
+    client.commands.set(command.data.name, command);
+    commands.push(command.data.toJSON());
+  }
+
   const guild_ids = client.guilds.cache.map((guild) => guild.id);
   const rest = new REST().setToken(process.env.TOKEN);
 
@@ -55,23 +59,15 @@ client.on(Events.ClientReady, () => {
 });
 
 client.on(Events.InteractionCreate, async (interaction) => {
-  if (!client.player) {
-    client.player = new Player(client, {
-      ytdlOptions: {
-        quality: "highestaudio",
-        highWaterMark: 1 << 25,
-      },
-    });
-  }
+  if (!interaction.isCommand()) return;
 
   const command = client.commands.get(interaction.commandName);
-  if (!interaction.isCommand()) return;
   try {
     await command.execute({ client, interaction });
   } catch (error) {
-    console.log(error);
-    await interaction.editReply({ content: "Error running command" });
+    await interaction.editReply({
+      content: "Error running command due to: ",
+      error,
+    });
   }
 });
-
-client.login(process.env.TOKEN);
