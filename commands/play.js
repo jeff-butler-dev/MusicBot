@@ -36,12 +36,16 @@ module.exports = {
     await interaction.deferReply();
     client.player.extractors.loadDefault();
 
+    // Checking to see if user is even in channel first before trying to play anything
     if (!interaction.member.voice.channel)
       return interaction.reply("Join a channel first");
+
+    //Creating queue object to be used in all commands and joining channel that it was created in
     const queue = await client.player.nodes.create(interaction.guild);
     if (!queue.connection)
       await queue.connect(interaction.member.voice.channel);
 
+    // Start of handle YT link
     if (interaction.options.getSubcommand() === "song") {
       let url = interaction.options.getString("url");
 
@@ -50,13 +54,15 @@ module.exports = {
         searchEngine: QueryType.YOUTUBE_VIDEO,
       });
 
+      // if above search returns no values, return no song found or assign track to trackToAdd
       if (result.tracks.length === 0) {
-        await interaction.reply("song not found");
-        return;
+        return await interaction.reply("song not found");
+      } else {
+        trackToAdd = result.tracks[0];
       }
 
-      trackToAdd = result.tracks[0];
-
+      // play and queue are assigned to different stacks. just adding to queue without check
+      // will result in doubles of the first instance of a track being added
       if (queue.size === 0) {
         queue.play(trackToAdd);
       } else {
@@ -80,21 +86,19 @@ module.exports = {
         return;
       }
 
+      // We dont have to do the same check here as adding single track
       playListToAdd = result.playlist;
       queue.addTrack(playListToAdd);
 
-      arrayOfSongs = [];
-      i = 1;
-      for (song in playListToAdd.tracks) {
-        title = playListToAdd.tracks[song].description;
-        arrayOfSongs.push({ name: String(i), value: title });
-        i += 1;
-      }
+      const queueString = queue.tracks
+        .map((song, i) => {
+          return `${i + 1}) ${song.duration} ${song.title}`;
+        })
+        .join("\n");
 
       embed = new EmbedBuilder()
         .setTitle("Playlist added")
-        .setDescription(`List of songs in playlist`)
-        .addFields(arrayOfSongs);
+        .setDescription(`\n\n**Queue**\n${queueString}`);
     } else if (interaction.options.getSubcommand() === "search") {
       let url = interaction.options.getString("searchterms");
       const result = await client.player.search(url, {

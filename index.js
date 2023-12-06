@@ -42,7 +42,7 @@ client.player.extractors.loadDefault();
 
 client.on(Events.ClientReady, () => {
   const guild_ids = client.guilds.cache.map((guild) => guild.id);
-  const rest = new REST({ version: "9" }).setToken(process.env.TOKEN);
+  const rest = new REST().setToken(process.env.TOKEN);
 
   for (const guildID of guild_ids) {
     rest
