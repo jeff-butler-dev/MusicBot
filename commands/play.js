@@ -103,7 +103,9 @@ module.exports = {
       let url = interaction.options.getString("searchterms");
       const result = await client.player.search(url, {
         requestedBy: interaction.user,
-        searchEngine: QueryType.AUTO,
+        // requested by Matt to be just yt
+        // full open search brought back some weird stuff across the webs
+        searchEngine: QueryType.YOUTUBE_SEARCH,
       });
 
       if (result.tracks.length === 0) {
