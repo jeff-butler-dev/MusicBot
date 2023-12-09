@@ -8,6 +8,8 @@ Bot is currently hosted on free site that will turn off without constant interac
 
 The following server is used for testing and notifying of new releases. If you are a user of the bot, there is also a specific channel for feature requests or bug reporting.
 
+Channel '#release-notif' is setup with a webhook to any releases that occur in <https://github.com/jeff-butler-dev/MusicBot>
+
 <https://discord.gg/2QufSXSjgQ>
 
 ## Local Installation
