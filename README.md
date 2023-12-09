@@ -31,3 +31,10 @@ npm start
 | /pause         | pauses feed, used for both pause and resume   |
 | /skip          | skips currently playing song                  |
 | /exit          | kills player instance and everything in queue |
+
+## Future work(subject to change based off feature requests discord server)
+
+- Port all code to TS
+- Improved error handling
+- Helper function modules to re-use less code in every command file
+- Testing all commands using JEST
