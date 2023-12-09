@@ -1,8 +1,16 @@
-## Basic Discord Music Bot
+# Basic Discord Music Bot
 
-Simple tool created for friends
+Simple tool created for friends.
 
-## Installation
+Bot is currently hosted on free site that will turn off without constant interaction. Navigate to <https://pleaseworkbot.onrender.com/> on your browser and the bot will spin up shortly after.
+
+## Release/Testing Server
+
+The following server is used for testing and notifying of new releases. If you are a user of the bot, there is also a specific channel for feature requests or bug reporting.
+
+<https://discord.gg/2QufSXSjgQ>
+
+## Local Installation
 
 Install the dependencies and devDependencies and start the server. Requires NodeJS prior to running the following
 
