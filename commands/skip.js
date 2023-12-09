@@ -9,14 +9,18 @@ module.exports = {
     const queue = useQueue(interaction.guildId);
     await interaction.deferReply();
 
-    if (queue.node.size === 0)
-      return await interaction.reply("There is nothing in the queue to skip");
-    if (!queue.connection)
-      return await interaction.reply("Join a channel first");
+    try {
+      if (queue.node.size === 0)
+        return await interaction.reply("There is nothing in the queue to skip");
+      if (!queue.connection)
+        return await interaction.reply("Join a channel first");
 
-    queue.node.skip();
+      queue.node.skip();
+    } catch (error) {
+      return error;
+    }
 
-    await interaction.reply({
+    await interaction.editReply({
       embeds: [
         new EmbedBuilder()
           .setTitle(`Skipped current track`)

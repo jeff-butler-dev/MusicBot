@@ -17,7 +17,7 @@ module.exports = {
     } catch (error) {
       console.log(error);
     }
-    await interaction.reply({
+    await interaction.editReply({
       embeds: [
         new EmbedBuilder()
           .setTitle(`Paused current track`)

@@ -7,19 +7,23 @@ module.exports = {
     .setDescription("returns first 25 songs in queue"),
   execute: async ({ client, interaction }) => {
     await interaction.deferReply();
-    const queue = useQueue(interaction.guild.id);
-
-    if (!queue || !queue.isPlaying()) {
-      await interaction.reply("There is no song playing");
-      return;
+    try {
+      const queue = useQueue(interaction.guild.id);
+      if (!queue || !queue.isPlaying()) {
+        await interaction.reply("There is no song playing");
+        return;
+      }
+      var queueString = queue.tracks
+        .map((song, i) => {
+          return `${i + 1}) ${song.duration} ${song.title}`;
+        })
+        .join("\n");
+      var currentSong = queue.currentTrack;
+    } catch (error) {
+      return error;
     }
-    const queueString = queue.tracks
-      .map((song, i) => {
-        return `${i + 1}) ${song.duration} ${song.title}`;
-      })
-      .join("\n");
-    const currentSong = queue.currentTrack;
-    await interaction.reply({
+
+    await interaction.editReply({
       embeds: [
         new EmbedBuilder()
           .setTitle(`Current Song: ${currentSong.title}`)

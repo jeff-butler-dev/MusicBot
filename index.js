@@ -65,9 +65,6 @@ client.on(Events.InteractionCreate, async (interaction) => {
   try {
     await command.execute({ client, interaction });
   } catch (error) {
-    await interaction.editReply({
-      content: "Error running command due to: ",
-      error,
-    });
+    await interaction.editReply({ content: "Unable to play" });
   }
 });

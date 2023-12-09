@@ -49,24 +49,28 @@ module.exports = {
     if (interaction.options.getSubcommand() === "song") {
       let url = interaction.options.getString("url");
 
-      const result = await client.player.search(url, {
-        requestedBy: interaction.user,
-        searchEngine: QueryType.YOUTUBE_VIDEO,
-      });
+      try {
+        const result = await client.player.search(url, {
+          requestedBy: interaction.user,
+          searchEngine: QueryType.YOUTUBE_VIDEO,
+        });
 
-      // if above search returns no values, return no song found or assign track to trackToAdd
-      if (result.tracks.length === 0) {
-        return await interaction.reply("song not found");
-      } else {
-        trackToAdd = result.tracks[0];
-      }
+        // if above search returns no values, return no song found or assign track to trackToAdd
+        if (result.tracks.length === 0) {
+          return await interaction.reply("song not found");
+        } else {
+          trackToAdd = result.tracks[0];
+        }
 
-      // play and queue are assigned to different stacks. just adding to queue without check
-      // will result in doubles of the first instance of a track being added
-      if (queue.size === 0) {
-        queue.play(trackToAdd);
-      } else {
-        queue.addTrack(trackToAdd);
+        // play and queue are assigned to different stacks. just adding to queue without check
+        // will result in doubles of the first instance of a track being added
+        if (queue.size === 0) {
+          queue.play(trackToAdd);
+        } else {
+          queue.addTrack(trackToAdd);
+        }
+      } catch (error) {
+        return error;
       }
 
       embed = new EmbedBuilder()
@@ -76,49 +80,56 @@ module.exports = {
     } else if (interaction.options.getSubcommand() === "playlist") {
       let url = interaction.options.getString("url");
 
-      const result = await client.player.search(url, {
-        requestedBy: interaction.user,
-        searchEngine: QueryType.YOUTUBE_PLAYLIST,
-      });
+      try {
+        const result = await client.player.search(url, {
+          requestedBy: interaction.user,
+          searchEngine: QueryType.YOUTUBE_PLAYLIST,
+        });
 
-      if (result.tracks.length === 0) {
-        await interaction.reply("playlist not found");
-        return;
+        if (result.tracks.length === 0) {
+          await interaction.reply("playlist not found");
+          return;
+        }
+
+        // We dont have to do the same check here as adding single track
+        playListToAdd = result.playlist;
+        queue.addTrack(playListToAdd);
+
+        var queueString = queue.tracks
+          .map((song, i) => {
+            return `${i + 1}) ${song.duration} ${song.title}`;
+          })
+          .join("\n");
+      } catch (error) {
+        return error;
       }
-
-      // We dont have to do the same check here as adding single track
-      playListToAdd = result.playlist;
-      queue.addTrack(playListToAdd);
-
-      const queueString = queue.tracks
-        .map((song, i) => {
-          return `${i + 1}) ${song.duration} ${song.title}`;
-        })
-        .join("\n");
 
       embed = new EmbedBuilder()
         .setTitle("Playlist added")
         .setDescription(`\n\n**Queue**\n${queueString}`);
     } else if (interaction.options.getSubcommand() === "search") {
       let url = interaction.options.getString("searchterms");
-      const result = await client.player.search(url, {
-        requestedBy: interaction.user,
-        // requested by Matt to be just yt
-        // full open search brought back some weird stuff across the webs
-        searchEngine: QueryType.YOUTUBE_SEARCH,
-      });
 
-      if (result.tracks.length === 0) {
-        await interaction.reply("nothing found in search");
-        return;
-      }
+      try {
+        var result = await client.player.search(url, {
+          requestedBy: interaction.user,
+          searchEngine: QueryType.YOUTUBE_SEARCH,
+        });
 
-      trackToAdd = result.tracks[0];
+        if (result.tracks.length === 0) {
+          await interaction.reply("nothing found in search");
+          return;
+        }
 
-      if (queue.size === 0) {
-        queue.play(trackToAdd);
-      } else {
-        queue.addTrack(trackToAdd);
+        trackToAdd = result.tracks[0];
+
+        if (queue.size === 0) {
+          queue.play(trackToAdd);
+        } else {
+          queue.addTrack(trackToAdd);
+        }
+      } catch (error) {
+        return error;
       }
 
       embed = new EmbedBuilder()

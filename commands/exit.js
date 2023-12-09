@@ -7,14 +7,18 @@ module.exports = {
     .setDescription("removes bot from channel"),
   execute: async ({ client, interaction }) => {
     await interaction.deferReply();
-    const queue = useQueue(interaction.guildId);
+    try {
+      const queue = useQueue(interaction.guildId);
 
-    if (!queue.connection) {
-      await interaction.reply("Not in a channel to exit");
-      return;
+      if (!queue.connection) {
+        await interaction.reply("Not in a channel to exit");
+        return;
+      }
+      queue.connection.destroy();
+    } catch (error) {
+      return error;
     }
-    queue.connection.destroy();
 
-    await interaction.reply("Successfully removed");
+    await interaction.editReply("Successfully removed");
   },
 };
